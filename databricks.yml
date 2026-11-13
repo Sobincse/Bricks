@@ -1,3 +1,4 @@
+
 bundle:
   name: sales_project
 
@@ -22,13 +23,16 @@ targets:
     default: true
     workspace:
       host: https://7474655178410696.azuredatabricks.net
+      root_path: /Workspace/Shared/DEV/${bundle.name}
 
   test:
-    mode: production
+    mode: development
     workspace:
-      host: https://YOUR-TEST-WORKSPACE.azuredatabricks.net
+      host: https://7474655178410696.azuredatabricks.net
+      root_path: /Workspace/Shared/TEST/${bundle.name}
 
   prod:
-    mode: production
+    mode: development
     workspace:
-      host: https://YOUR-PROD-WORKSPACE.azuredatabricks.net
+      host: https://7474655178410696.azuredatabricks.net
+      root_path: /Workspace/Shared/PROD/${bundle.name}
