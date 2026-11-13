@@ -22,17 +22,17 @@ targets:
     mode: development
     default: true
     workspace:
-      host: https://7474655178410696.azuredatabricks.net
+      host: https://dbc-706c9c8c-5db5.cloud.databricks.com
       root_path: /Workspace/Shared/DEV/${bundle.name}
 
   test:
     mode: development
     workspace:
-      host: https://7474655178410696.azuredatabricks.net
+      host: https://dbc-706c9c8c-5db5.cloud.databricks.com
       root_path: /Workspace/Shared/TEST/${bundle.name}
 
   prod:
     mode: development
     workspace:
-      host: https://7474655178410696.azuredatabricks.net
+      host: https://dbc-706c9c8c-5db5.cloud.databricks.com
       root_path: /Workspace/Shared/PROD/${bundle.name}
