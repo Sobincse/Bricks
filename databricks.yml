@@ -23,16 +23,17 @@ targets:
     default: true
     workspace:
       host: https://dbc-706c9c8c-5db5.cloud.databricks.com
-      root_path: /Workspace/Shared/DEV/${bundle.name}
+      root_path: /Workspace/Shared/DEV/${workspace.current_user.userName}/sales_project
 
   test:
     mode: development
     workspace:
       host: https://dbc-706c9c8c-5db5.cloud.databricks.com
-      root_path: /Workspace/Shared/TEST/${bundle.name}
+      root_path: /Workspace/Shared/TEST/${workspace.current_user.userName}/sales_project
 
   prod:
     mode: development
     workspace:
       host: https://dbc-706c9c8c-5db5.cloud.databricks.com
-      root_path: /Workspace/Shared/PROD/${bundle.name}
+      root_path: /Workspace/Shared/PROD/${workspace.current_user.userName}/sales_project
+
