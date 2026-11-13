@@ -1,3 +1,4 @@
+
 name: Databricks CI CD
 
 on:
@@ -8,22 +9,47 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
+
+  # ==========================
+  # DEV ENVIRONMENT
+  # ==========================
   deploy-dev:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: dev
+
     env:
       DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
       DATABRICKS_AUTH_TYPE: pat
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: databricks/setup-cli@main
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Check DEV authentication settings
+        run: |
+          echo "Authentication type: $DATABRICKS_AUTH_TYPE"
+
+          if [ -z "$DATABRICKS_HOST" ]; then
+            echo "ERROR: DATABRICKS_HOST is missing"
+            exit 1
+          fi
+
+          if [ -z "$DATABRICKS_TOKEN" ]; then
+            echo "ERROR: DATABRICKS_TOKEN is missing"
+            exit 1
+          fi
+
+          echo "DEV authentication settings are configured"
+
+      - name: Test DEV Databricks connection
+        run: databricks current-user me
 
       - name: Validate DEV
         run: databricks bundle validate -t dev
@@ -34,18 +60,45 @@ jobs:
       - name: Run DEV job
         run: databricks bundle run -t dev sales_job
 
+  # ==========================
+  # TEST ENVIRONMENT
+  # ==========================
   deploy-test:
+    needs: deploy-dev
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: test
+
     env:
       DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
       DATABRICKS_AUTH_TYPE: pat
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: databricks/setup-cli@main
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Check TEST authentication settings
+        run: |
+          echo "Authentication type: $DATABRICKS_AUTH_TYPE"
+
+          if [ -z "$DATABRICKS_HOST" ]; then
+            echo "ERROR: DATABRICKS_HOST is missing"
+            exit 1
+          fi
+
+          if [ -z "$DATABRICKS_TOKEN" ]; then
+            echo "ERROR: DATABRICKS_TOKEN is missing"
+            exit 1
+          fi
+
+          echo "TEST authentication settings are configured"
+
+      - name: Test TEST Databricks connection
+        run: databricks current-user me
 
       - name: Validate TEST
         run: databricks bundle validate -t test
@@ -56,19 +109,45 @@ jobs:
       - name: Run TEST job
         run: databricks bundle run -t test sales_job
 
+  # ==========================
+  # PROD ENVIRONMENT
+  # ==========================
   deploy-prod:
-    if: github.ref == 'refs/heads/main'
     needs: deploy-test
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: prod
+
     env:
       DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
       DATABRICKS_AUTH_TYPE: pat
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: databricks/setup-cli@main
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Check PROD authentication settings
+        run: |
+          echo "Authentication type: $DATABRICKS_AUTH_TYPE"
+
+          if [ -z "$DATABRICKS_HOST" ]; then
+            echo "ERROR: DATABRICKS_HOST is missing"
+            exit 1
+          fi
+
+          if [ -z "$DATABRICKS_TOKEN" ]; then
+            echo "ERROR: DATABRICKS_TOKEN is missing"
+            exit 1
+          fi
+
+          echo "PROD authentication settings are configured"
+
+      - name: Test PROD Databricks connection
+        run: databricks current-user me
 
       - name: Validate PROD
         run: databricks bundle validate -t prod
