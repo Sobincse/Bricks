@@ -12,9 +12,9 @@ permissions:
 
 jobs:
 
-  # ==========================
-  # DEV ENVIRONMENT
-  # ==========================
+  # =========================
+  # DEV
+  # =========================
   deploy-dev:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -46,9 +46,30 @@ jobs:
             exit 1
           fi
 
-          echo "DEV authentication settings are configured"
+          echo "DEV settings are configured"
 
-      - name: Test DEV Databricks connection
+      - name: Test DEV Databricks API
+        shell: bash
+        run: |
+          echo "Testing Databricks API..."
+
+          STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
+            --connect-timeout 15 \
+            --max-time 30 \
+            -H "Authorization: Bearer $DATABRICKS_TOKEN" \
+            -H "Accept: application/json" \
+            "$DATABRICKS_HOST/api/2.0/preview/scim/v2/Me")
+
+          echo "HTTP status: $STATUS"
+
+          if [ "$STATUS" != "200" ]; then
+            echo "ERROR: Databricks API test failed"
+            exit 1
+          fi
+
+          echo "Databricks API test successful"
+
+      - name: Test DEV CLI connection
         run: databricks current-user me
 
       - name: Validate DEV
@@ -60,9 +81,9 @@ jobs:
       - name: Run DEV job
         run: databricks bundle run -t dev sales_job
 
-  # ==========================
-  # TEST ENVIRONMENT
-  # ==========================
+  # =========================
+  # TEST
+  # =========================
   deploy-test:
     needs: deploy-dev
     if: github.ref == 'refs/heads/main'
@@ -83,8 +104,6 @@ jobs:
 
       - name: Check TEST authentication settings
         run: |
-          echo "Authentication type: $DATABRICKS_AUTH_TYPE"
-
           if [ -z "$DATABRICKS_HOST" ]; then
             echo "ERROR: DATABRICKS_HOST is missing"
             exit 1
@@ -95,9 +114,26 @@ jobs:
             exit 1
           fi
 
-          echo "TEST authentication settings are configured"
+          echo "TEST settings are configured"
 
-      - name: Test TEST Databricks connection
+      - name: Test TEST Databricks API
+        shell: bash
+        run: |
+          STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
+            --connect-timeout 15 \
+            --max-time 30 \
+            -H "Authorization: Bearer $DATABRICKS_TOKEN" \
+            -H "Accept: application/json" \
+            "$DATABRICKS_HOST/api/2.0/preview/scim/v2/Me")
+
+          echo "HTTP status: $STATUS"
+
+          if [ "$STATUS" != "200" ]; then
+            echo "ERROR: TEST API connection failed"
+            exit 1
+          fi
+
+      - name: Test TEST CLI connection
         run: databricks current-user me
 
       - name: Validate TEST
@@ -109,9 +145,9 @@ jobs:
       - name: Run TEST job
         run: databricks bundle run -t test sales_job
 
-  # ==========================
-  # PROD ENVIRONMENT
-  # ==========================
+  # =========================
+  # PROD
+  # =========================
   deploy-prod:
     needs: deploy-test
     if: github.ref == 'refs/heads/main'
@@ -132,8 +168,6 @@ jobs:
 
       - name: Check PROD authentication settings
         run: |
-          echo "Authentication type: $DATABRICKS_AUTH_TYPE"
-
           if [ -z "$DATABRICKS_HOST" ]; then
             echo "ERROR: DATABRICKS_HOST is missing"
             exit 1
@@ -144,9 +178,26 @@ jobs:
             exit 1
           fi
 
-          echo "PROD authentication settings are configured"
+          echo "PROD settings are configured"
 
-      - name: Test PROD Databricks connection
+      - name: Test PROD Databricks API
+        shell: bash
+        run: |
+          STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
+            --connect-timeout 15 \
+            --max-time 30 \
+            -H "Authorization: Bearer $DATABRICKS_TOKEN" \
+            -H "Accept: application/json" \
+            "$DATABRICKS_HOST/api/2.0/preview/scim/v2/Me")
+
+          echo "HTTP status: $STATUS"
+
+          if [ "$STATUS" != "200" ]; then
+            echo "ERROR: PROD API connection failed"
+            exit 1
+          fi
+
+      - name: Test PROD CLI connection
         run: databricks current-user me
 
       - name: Validate PROD
