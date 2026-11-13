@@ -9,7 +9,7 @@ resources:
       tasks:
         - task_key: transform
           notebook_task:
-            notebook_path: ./notebooks/sales_transformation
+            notebook_path: ./notebooks/sales_transformation.ipynb
           environment_key: default
 
       environments:
