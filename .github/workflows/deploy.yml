@@ -17,8 +17,8 @@ jobs:
     environment: dev
     env:
       DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
-      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
-      DATABRICKS_AUTH_TYPE: github-oidc
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      DATABRICKS_AUTH_TYPE: pat
 
     steps:
       - uses: actions/checkout@v4
@@ -40,9 +40,8 @@ jobs:
     environment: test
     env:
       DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
-      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
-      DATABRICKS_AUTH_TYPE: github-oidc
-
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      DATABRICKS_AUTH_TYPE: pat
     steps:
       - uses: actions/checkout@v4
 
@@ -64,9 +63,8 @@ jobs:
     environment: prod
     env:
       DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
-      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
-      DATABRICKS_AUTH_TYPE: github-oidc
-
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      DATABRICKS_AUTH_TYPE: pat
     steps:
       - uses: actions/checkout@v4
 
