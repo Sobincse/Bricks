@@ -1,0 +1,79 @@
+name: Databricks CI CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-dev:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_AUTH_TYPE: github-oidc
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: databricks/setup-cli@main
+
+      - name: Validate DEV
+        run: databricks bundle validate -t dev
+
+      - name: Deploy DEV
+        run: databricks bundle deploy -t dev
+
+      - name: Run DEV job
+        run: databricks bundle run -t dev sales_job
+
+  deploy-test:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: test
+    env:
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_AUTH_TYPE: github-oidc
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: databricks/setup-cli@main
+
+      - name: Validate TEST
+        run: databricks bundle validate -t test
+
+      - name: Deploy TEST
+        run: databricks bundle deploy -t test
+
+      - name: Run TEST job
+        run: databricks bundle run -t test sales_job
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    needs: deploy-test
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_AUTH_TYPE: github-oidc
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: databricks/setup-cli@main
+
+      - name: Validate PROD
+        run: databricks bundle validate -t prod
+
+      - name: Deploy PROD
+        run: databricks bundle deploy -t prod
